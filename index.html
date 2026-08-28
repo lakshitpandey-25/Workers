@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAARIGAR — Cooperative Service Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#173b57; --navy-dark:#0f2d43; --olive:#485717;
+    --amber:#e8a317; --bg:#f5f7fb; --red:#c83c30; --red-bg:#fff3f1; --red-border:#ffd8d2;
+    --green:#16834a; --green-bg:#e5f7ed; --border:#e5e5e5; --muted:#777;
+    --ink:#12222f; --ink-soft:#1c3345; --paper:#fbfaf6; --clay:#c8781f; --clay-dark:#a5620f;
+    --sand:#cfd6c8; --line-warm:#e6e1d3;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',Arial,Helvetica,sans-serif;}
+  body{background:var(--bg);color:#222;min-height:100vh;}
+  .page{display:none;}
+  .page.active{display:block;}
+  button{font-family:inherit;}
+  input,textarea,select{font-family:inherit;}
+
+  #page-login.active{display:flex;}
+  .login-shell{display:flex;width:100%;min-height:100vh;}
+
+  .login-visual{width:44%;position:relative;overflow:hidden;background:linear-gradient(165deg,var(--ink) 0%,var(--ink-soft) 55%,var(--olive) 130%);color:#fff;padding:64px 56px;display:flex;flex-direction:column;justify-content:center;}
+  .login-visual::before{content:"";position:absolute;inset:0;opacity:.08;pointer-events:none;
+    background-image:repeating-linear-gradient(0deg, transparent 0 39px, rgba(255,255,255,.6) 39px 40px),
+      repeating-linear-gradient(90deg, transparent 0 39px, rgba(255,255,255,.6) 39px 40px);}
+  .login-visual::after{content:"";position:absolute;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(circle, rgba(200,120,31,.35), transparent 70%);
+    right:-180px;bottom:-200px;pointer-events:none;}
+  .brand-mark{position:relative;font-family:'Fraunces',serif;font-size:15px;letter-spacing:5px;text-transform:uppercase;color:var(--clay);font-weight:500;margin-bottom:34px;opacity:0;animation:fadeUp .6s ease forwards;}
+  .visual-headline{position:relative;font-family:'Fraunces',serif;font-weight:500;font-size:clamp(30px,3.6vw,44px);line-height:1.18;margin-bottom:18px;opacity:0;animation:fadeUp .6s ease .08s forwards;}
+  .visual-headline em{font-style:italic;color:var(--clay);}
+  .visual-tag{position:relative;font-size:15px;line-height:1.6;color:var(--sand);max-width:380px;margin-bottom:36px;opacity:0;animation:fadeUp .6s ease .16s forwards;}
+  .feature-list{position:relative;list-style:none;}
+  .feature-list li{display:flex;align-items:center;gap:12px;font-size:14px;color:#e9ece4;margin:13px 0;opacity:0;animation:fadeUp .5s ease forwards;}
+  .feature-list li:nth-child(1){animation-delay:.24s;}
+  .feature-list li:nth-child(2){animation-delay:.30s;}
+  .feature-list li:nth-child(3){animation-delay:.36s;}
+  .feature-list li:nth-child(4){animation-delay:.42s;}
+  .feature-list li:nth-child(5){animation-delay:.48s;}
+  .f-ico{width:22px;height:22px;border-radius:50%;background:rgba(200,120,31,.22);border:1px solid rgba(200,120,31,.5);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--clay);flex-shrink:0;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+  .login-form-panel{width:56%;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:48px;}
+  .login-form-inner{width:100%;max-width:400px;}
+  .step-track{display:flex;align-items:center;gap:10px;margin-bottom:30px;}
+  .step-dot{width:26px;height:26px;border-radius:50%;border:1.5px solid #cfc9ba;color:#a39c88;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:.25s ease;flex-shrink:0;}
+  .step-dot.active{border-color:var(--clay);color:var(--clay);background:#fdf3e7;}
+  .step-dot.done{border-color:var(--clay);background:var(--clay);color:#fff;}
+  .step-line{flex:1;height:1px;background:#e0dbcb;position:relative;overflow:hidden;}
+  .step-line::after{content:"";position:absolute;inset:0;background:var(--clay);transform:scaleX(0);transform-origin:left;transition:transform .35s ease;}
+  .step-line.filled::after{transform:scaleX(1);}
+  .step-label{font-size:11px;color:#a39c88;}
+
+  .login-form-inner h1{font-family:'Fraunces',serif;font-weight:500;color:var(--ink);font-size:30px;margin-bottom:5px;}
+  .auth-sub{color:var(--muted);margin-bottom:26px;font-size:14px;}
+  .role-tabs{display:flex;gap:10px;margin-bottom:22px;}
+  .role-tab{flex:1;padding:12px;border:1.5px solid #e0dbcb;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;text-align:center;transition:.18s ease;}
+  .role-tab:hover{border-color:var(--ink);transform:translateY(-1px);box-shadow:0 4px 12px rgba(18,34,47,.08);}
+  .role-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .role-tab.active:hover{transform:none;box-shadow:none;}
+  label{display:block;margin-bottom:6px;font-size:12.5px;font-weight:600;color:#4a4638;letter-spacing:.2px;}
+  .field{margin-bottom:17px;}
+  input[type=text],input[type=tel],input[type=date],input[type=time],input[type=number],textarea,select{
+    width:100%;padding:13px 14px;border:1.5px solid #e0dbcb;border-radius:9px;font-size:14px;outline:none;background:#fff;transition:border-color .18s ease, box-shadow .18s ease;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--clay);box-shadow:0 0 0 4px rgba(200,120,31,.13);}
+  @media(max-width:900px){
+    .login-shell{flex-direction:column;}
+    .login-visual{width:100%;padding:40px 32px;min-height:auto;}
+    .feature-list{display:none;}
+    .login-form-panel{width:100%;padding:36px 24px;}
+  }
+  .btn-main{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:15px;font-weight:600;transition:.2s ease;}
+  .btn-main:hover{background:var(--navy-dark);transform:translateY(-2px);box-shadow:0 10px 22px rgba(15,45,67,.28);}
+  .btn-main:active{transform:translateY(0);box-shadow:none;}
+  .otp-section{display:none;}
+  .hint{text-align:center;font-size:12px;color:#999;margin-top:14px;}
+  .auth-msg{text-align:center;margin-top:12px;font-size:13px;min-height:18px;}
+
+  /* ============ HEADER ============ */
+  header{height:68px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;}
+  .logo{font-size:24px;font-weight:bold;color:var(--navy);cursor:pointer;}
+  .header-right{display:flex;align-items:center;gap:18px;font-size:14px;}
+  .nav-link{color:var(--navy);cursor:pointer;font-weight:bold;position:relative;}
+  .nav-link:hover{text-decoration:underline;}
+  .badge-count{background:var(--amber);color:#fff;font-size:10px;border-radius:10px;padding:1px 6px;margin-left:4px;}
+  .loc-badge{color:#555;}
+  .profile{display:flex;align-items:center;gap:8px;}
+  .profile-icon{width:34px;height:34px;background:var(--navy);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;}
+  .logout-btn{background:none;border:1px solid #ddd;padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12px;color:#555;}
+  .logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+  .container{width:90%;max-width:1200px;margin:32px auto;}
+  .welcome h1{margin-bottom:6px;}
+  .welcome p{color:var(--muted);margin-bottom:26px;}
+
+  /* ============ SEARCH ============ */
+  .search-container{background:#fff;padding:26px;border-radius:15px;margin-bottom:30px;}
+  .search-container h2{margin-bottom:16px;font-size:19px;}
+  .search-box{display:flex;border-radius:8px;overflow:hidden;border:1px solid #ddd;}
+  .search-box input{flex:1;border:none;padding:15px;font-size:15px;}
+  .search-box input:focus{border:none;}
+  .search-box button{width:120px;border:none;background:var(--amber);color:#fff;font-weight:bold;cursor:pointer;}
+
+  .section-title{color:var(--navy);margin-bottom:16px;}
+  .services{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .service-card{background:#fff;border-radius:12px;padding:22px 14px;text-align:center;cursor:pointer;border:1px solid #eee;transition:.2s;}
+  .service-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.08);}
+  .service-icon{font-size:32px;margin-bottom:10px;}
+  .service-card h3{color:#333;font-size:15px;}
+  .service-card p{color:#888;font-size:12px;margin-top:4px;}
+
+  .emergency{margin-top:30px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:12px;padding:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .emergency h3{color:#b83b2f;margin-bottom:4px;}
+  .emergency p{color:var(--muted);}
+  .emergency button{background:var(--red);color:#fff;border:none;padding:12px 18px;border-radius:7px;cursor:pointer;font-weight:bold;}
+
+  @media(max-width:800px){.services{grid-template-columns:repeat(2,1fr);}}
+
+  /* ============ RECOMMENDATIONS ============ */
+  .back{color:var(--navy);cursor:pointer;margin-bottom:16px;display:inline-block;font-weight:bold;font-size:14px;}
+  .back:hover{text-decoration:underline;}
+  .title h1{color:var(--navy);margin-bottom:5px;font-size:26px;}
+  .title p{color:var(--muted);}
+  .content{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:20px;}
+  .workers{display:flex;flex-direction:column;gap:16px;}
+  .worker-card{background:#fff;border-radius:14px;padding:20px;border:1px solid #e8e8e8;display:flex;gap:16px;transition:.2s;}
+  .worker-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08);}
+  .worker-avatar{width:60px;height:60px;background:#dce9f1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:bold;color:var(--navy);flex-shrink:0;}
+  .worker-details{flex:1;min-width:0;}
+  .worker-name{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .worker-name h2{color:var(--navy);font-size:17px;}
+  .verified{background:var(--green-bg);color:var(--green);padding:4px 8px;border-radius:15px;font-size:10px;font-weight:bold;white-space:nowrap;}
+  .pending{background:#fff4e0;color:#a56a00;padding:4px 8px;border-radius:15px;font-size:10px;font-weight:bold;white-space:nowrap;}
+  .skill{margin-top:6px;color:#555;font-size:14px;}
+  .info{display:flex;gap:12px;margin-top:10px;color:#666;font-size:12px;flex-wrap:wrap;}
+  .availability{color:#198754;font-size:12px;font-weight:bold;margin-top:8px;}
+  .availability.off{color:#999;}
+  .match{margin-top:10px;background:#f1f6fa;padding:9px;border-radius:8px;font-size:12px;color:#555;}
+  .match strong{color:var(--navy);font-size:14px;}
+  .buttons{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .view-btn{padding:8px 13px;background:#fff;border:1px solid var(--navy);color:var(--navy);border-radius:7px;cursor:pointer;font-size:13px;}
+  .view-btn:hover{background:#f1f6fa;}
+  .book-btn{padding:8px 13px;background:var(--navy);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:bold;font-size:13px;}
+  .book-btn:hover{background:var(--navy-dark);}
+  .no-workers{background:#fff;border-radius:14px;padding:36px;text-align:center;color:var(--muted);}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .chip{padding:7px 12px;border:1px solid var(--navy);color:var(--navy);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;}
+  .chip:hover{background:var(--navy);color:#fff;}
+
+  .map-container{background:#fff;border-radius:14px;border:1px solid #e8e8e8;overflow:hidden;height:560px;}
+  .map-header{padding:16px;border-bottom:1px solid #eee;}
+  .map-header h3{color:var(--navy);margin-bottom:4px;font-size:15px;}
+  .map-header p{color:var(--muted);font-size:12px;}
+  .map{height:calc(100% - 70px);background:#e3ebe6;position:relative;overflow:hidden;}
+  .road{position:absolute;height:22px;width:130%;background:#fff;transform:rotate(-20deg);top:45%;left:-15%;}
+  .road2{position:absolute;height:20px;width:130%;background:#fff;transform:rotate(30deg);top:55%;left:-15%;}
+  .road3{position:absolute;height:15px;width:120%;background:#fff;transform:rotate(75deg);top:20%;left:-10%;}
+  .marker{position:absolute;font-size:26px;}
+  .map-label{position:absolute;background:#fff;padding:4px 7px;border-radius:6px;font-size:10px;box-shadow:0 2px 8px rgba(0,0,0,.15);white-space:nowrap;}
+  .ai-box{position:absolute;bottom:14px;left:14px;right:14px;background:#fff;padding:14px;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,.15);}
+  .ai-box h3{color:var(--navy);margin-bottom:5px;font-size:14px;}
+  .ai-box p{color:#666;font-size:12px;line-height:1.5;}
+  @media(max-width:900px){.content{grid-template-columns:1fr;}.map-container{height:400px;}}
+
+  /* ============ MODALS ============ */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(15,20,30,.5);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .overlay.active{display:flex;}
+  .modal{background:#fff;border-radius:16px;width:480px;max-width:100%;max-height:88vh;overflow-y:auto;padding:28px;position:relative;}
+  .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:#999;}
+  .modal h2{color:var(--navy);margin-bottom:4px;font-size:20px;}
+  .modal .sub{color:var(--muted);font-size:13px;margin-bottom:18px;}
+  .profile-row{display:flex;gap:14px;align-items:center;margin-bottom:16px;}
+  .profile-tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;}
+  .tag{background:#eef3f7;color:var(--navy);font-size:11px;padding:4px 9px;border-radius:12px;font-weight:bold;}
+  .cert-list{list-style:none;margin-top:8px;}
+  .cert-list li{font-size:13px;color:#444;margin:6px 0;}
+  .cert-list li::before{content:"📄 ";}
+
+  /* ============ FORMS (bookings / onboarding) ============ */
+  .form-card{background:#fff;border-radius:15px;padding:28px;}
+  .checkbox-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+  .checkbox-item{display:flex;align-items:center;gap:8px;border:1px solid #ddd;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;}
+  .checkbox-item.checked{border-color:var(--navy);background:#f1f6fa;}
+  .checkbox-item input{width:auto;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  /* ============ BOOKINGS LIST ============ */
+  .booking-card{background:#fff;border-radius:14px;padding:20px;border:1px solid #e8e8e8;margin-bottom:14px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .booking-status{font-size:11px;font-weight:bold;padding:5px 10px;border-radius:14px;white-space:nowrap;height:fit-content;}
+  .status-Pending{background:#fff4e0;color:#a56a00;}
+  .status-Accepted{background:var(--green-bg);color:var(--green);}
+  .status-Declined{background:#fdeceb;color:var(--red);}
+  .status-Completed{background:#e8ecf5;color:var(--navy);}
+  .status-Cancelled{background:#f0f0f0;color:#888;}
+  .empty-state{background:#fff;border-radius:14px;padding:50px;text-align:center;color:var(--muted);}
+
+  /* ============ WORKER DASHBOARD ============ */
+  .worker-grid{display:grid;grid-template-columns:320px 1fr;gap:24px;}
+  @media(max-width:900px){.worker-grid{grid-template-columns:1fr;}}
+  .wp-card{background:#fff;border-radius:15px;padding:24px;}
+  .wp-avatar{width:70px;height:70px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:bold;margin-bottom:12px;}
+  .verify-banner{background:#fff4e0;border:1px solid #ffe0a3;border-radius:10px;padding:14px;margin-top:14px;font-size:13px;color:#7a5200;}
+  .verify-banner button{margin-top:10px;background:var(--navy);color:#fff;border:none;padding:9px 14px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:bold;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-top:16px;font-size:13px;font-weight:bold;color:#444;}
+  .switch{position:relative;width:44px;height:24px;background:#ddd;border-radius:12px;cursor:pointer;transition:.2s;flex-shrink:0;}
+  .switch.on{background:var(--green);}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;}
+  .switch.on::after{left:22px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px;}
+  .review-card{background:#fff;border-radius:14px;padding:16px 18px;border:1px solid #e8e8e8;margin-bottom:12px;}
+  .review-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .review-top h4{color:var(--navy);font-size:14px;}
+  .review-stars{color:var(--amber);font-size:13px;font-weight:bold;white-space:nowrap;}
+  .review-comment{color:#555;font-size:13px;margin-top:6px;line-height:1.5;}
+  .review-date{color:#999;font-size:11px;margin-top:6px;}
+  .balance-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+  .balance-box{border-radius:12px;padding:16px;}
+  .balance-box.earned{background:var(--green-bg);}
+  .balance-box.pending{background:#fff4e0;}
+  .balance-box .amt{font-size:22px;font-weight:bold;}
+  .balance-box.earned .amt{color:var(--green);}
+  .balance-box.pending .amt{color:#a56a00;}
+  .balance-box .lbl{font-size:12px;color:#666;margin-top:2px;}
+  .pay-status{font-size:11px;font-weight:bold;padding:4px 9px;border-radius:12px;white-space:nowrap;}
+  .pay-status.Paid{background:var(--green-bg);color:var(--green);}
+  .pay-status.Unpaid{background:#fdeceb;color:var(--red);}
+  .mark-paid-btn{padding:7px 12px;background:var(--navy);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:bold;font-size:12px;}
+  .mark-paid-btn:hover{background:var(--navy-dark);}
+  .stat-box{background:#f5f7fb;border-radius:10px;padding:12px;text-align:center;}
+  .stat-box .num{font-size:18px;font-weight:bold;color:var(--navy);}
+  .stat-box .lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+
+  /* ============ TOAST ============ */
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#173b57;color:#fff;padding:13px 22px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:200;box-shadow:0 8px 20px rgba(0,0,0,.2);}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.error{background:var(--red);}
+
+  .section-block{margin-bottom:26px;}
+  h2.h-title{color:var(--navy);margin-bottom:14px;font-size:18px;}
+</style>
+</head>
+<body>
+
+<!-- ================= TOAST ================= -->
+<div id="toast"></div>
+
+<!-- ================= LOGIN ================= -->
+<section class="page active" id="page-login">
+  <div class="login-shell">
+    <div class="login-visual">
+      <div class="brand-mark">KAARIGAR</div>
+      <h1 class="visual-headline">Skilled hands,<br><em>verified</em> by your cooperative.</h1>
+      <p class="visual-tag">Connecting Labour Cooperative Federations and their electricians, plumbers, caregivers and more to households that need trusted, fairly-paid help.</p>
+      <ul class="feature-list">
+        <li><span class="f-ico">✓</span>Verified Cooperative Workers</li>
+        <li><span class="f-ico">✓</span>Smart Local Matching</li>
+        <li><span class="f-ico">✓</span>Fair &amp; Transparent Services</li>
+        <li><span class="f-ico">✓</span>Worker Welfare Support</li>
+        <li><span class="f-ico">✓</span>Emergency Service Assistance</li>
+      </ul>
+    </div>
+
+    <div class="login-form-panel">
+      <div class="login-form-inner">
+        <div class="step-track">
+          <div class="step-dot active" id="stepDot1">1</div>
+          <div class="step-line" id="stepLine"></div>
+          <div class="step-dot" id="stepDot2">2</div>
+        </div>
+
+        <h1>Welcome</h1>
+        <p class="auth-sub">Log in to continue to KAARIGAR</p>
+
+        <div class="role-tabs">
+          <div class="role-tab active" id="tab-customer" onclick="selectRole('customer')">I need a service</div>
+          <div class="role-tab" id="tab-worker" onclick="selectRole('worker')">I'm a cooperative worker</div>
+        </div>
+
+        <div id="loginFields">
+          <div class="field">
+            <label>Your Name</label>
+            <input type="text" id="loginName" placeholder="Enter your full name" onkeypress="if(event.key==='Enter')sendOTP()">
+          </div>
+          <div class="field">
+            <label>Mobile Number</label>
+            <input type="tel" id="loginPhone" placeholder="Enter 10 digit mobile number" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" onkeypress="if(event.key==='Enter')sendOTP()">
+          </div>
+          <button class="btn-main" onclick="sendOTP()">Send OTP</button>
+          <p class="hint">Demo number: any 10 digits work</p>
+        </div>
+
+        <div class="otp-section" id="otpSection">
+          <div class="field">
+            <label>Enter OTP</label>
+            <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)" onkeypress="if(event.key==='Enter')verifyOTP()">
+          </div>
+          <button class="btn-main" onclick="verifyOTP()">Verify &amp; Login</button>
+          <p class="hint">Demo OTP: <b>123456</b></p>
+        </div>
+
+        <div class="auth-msg" id="authMsg"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CUSTOMER DASHBOARD ================= -->
+<section class="page" id="page-customer-dashboard">
+  <header>
+    <div class="logo" onclick="showPage('page-customer-dashboard')">KAARIGAR</div>
+    <div class="header-right">
+      <span class="loc-badge">📍 Haldwani</span>
+      <span class="nav-link" onclick="showPage('page-customer-dashboard')">Home</span>
+      <span class="nav-link" onclick="renderMyBookings();showPage('page-my-bookings')">My Bookings<span class="badge-count" id="bookingCountBadge">0</span></span>
+      <div class="profile"><div class="profile-icon" id="custAvatar">U</div><span id="custNameHeader">User</span></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="welcome">
+      <h1 id="custGreeting">Good day 👋</h1>
+      <p>Find trusted, verified workers from your local labour cooperative.</p>
+    </div>
+    <div class="search-container">
+      <h2>What service do you need?</h2>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search electrician, plumber, cleaning...">
+        <button onclick="searchService()">Search</button>
+      </div>
+    </div>
+    <h2 class="section-title">Popular Services</h2>
+    <div class="services" id="serviceGrid"></div>
+    <div class="emergency">
+      <div>
+        <h3>🚨 Need urgent help?</h3>
+        <p>We'll instantly find the nearest available verified worker.</p>
+      </div>
+      <button onclick="emergencyService()">Emergency Service</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RECOMMENDATIONS ================= -->
+<section class="page" id="page-recommendations">
+  <header>
+    <div class="logo" onclick="showPage('page-customer-dashboard')">KAARIGAR</div>
+    <div class="header-right">
+      <span class="loc-badge">📍 Haldwani</span>
+      <span class="nav-link" onclick="showPage('page-customer-dashboard')">Home</span>
+      <span class="nav-link" onclick="renderMyBookings();showPage('page-my-bookings')">My Bookings<span class="badge-count" id="bookingCountBadge2">0</span></span>
+      <div class="profile"><div class="profile-icon" id="custAvatar2">U</div><span id="custNameHeader2">User</span></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="back" onclick="showPage('page-customer-dashboard')">← Back to Dashboard</div>
+    <div class="title">
+      <h1 id="pageTitle">Recommended Workers</h1>
+      <p id="pageSubtitle">Verified workers near your location</p>
+    </div>
+    <div class="content">
+      <div class="workers" id="workersList"></div>
+      <div class="map-container">
+        <div class="map-header">
+          <h3>📍 Nearby Workers</h3>
+          <p>Location-aware service matching</p>
+        </div>
+        <div class="map">
+          <div class="road"></div><div class="road2"></div><div class="road3"></div>
+          <div class="marker" style="top:45%;left:48%;">📍</div>
+          <div class="map-label" style="top:51%;left:43%;">You</div>
+          <div class="marker" style="top:27%;left:30%;">👷</div>
+          <div class="map-label" style="top:33%;left:23%;" id="mapWorker1">Worker 1</div>
+          <div class="marker" style="top:60%;left:68%;">👷</div>
+          <div class="map-label" style="top:66%;left:61%;" id="mapWorker2">Worker 2</div>
+          <div class="marker" style="top:20%;left:70%;">👷</div>
+          <div class="map-label" style="top:26%;left:63%;" id="mapWorker3">Worker 3</div>
+          <div class="ai-box">
+            <h3>🤖 AI-Powered Matching</h3>
+            <p>Workers are ranked using skill match, distance, rating and current availability.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MY BOOKINGS ================= -->
+<section class="page" id="page-my-bookings">
+  <header>
+    <div class="logo" onclick="showPage('page-customer-dashboard')">KAARIGAR</div>
+    <div class="header-right">
+      <span class="loc-badge">📍 Haldwani</span>
+      <span class="nav-link" onclick="showPage('page-customer-dashboard')">Home</span>
+      <div class="profile"><div class="profile-icon" id="custAvatar3">U</div><span id="custNameHeader3">User</span></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="title"><h1>My Bookings</h1><p>Track requests you've sent to cooperative workers</p></div>
+    <div id="myBookingsList"></div>
+  </div>
+</section>
+
+<!-- ================= WORKER ONBOARDING ================= -->
+<section class="page" id="page-worker-onboarding">
+  <header>
+    <div class="logo">KAARIGAR</div>
+    <div class="header-right">
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div class="container" style="max-width:640px;">
+    <div class="title"><h1>🎉 You're logged in — one-time step left</h1><p>This is <b>not</b> the login screen. Complete your skill profile once so cooperative federations can verify and start sending you bookings.</p></div>
+    <div class="form-card">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="wFullName" placeholder="Your full name">
+      </div>
+      <div class="field">
+        <label>Labour Cooperative Society / Federation</label>
+        <input type="text" id="wCoop" placeholder="e.g. Kumaon Shram Sahakari Samiti">
+      </div>
+      <div class="field">
+        <label>Service Skills (select all that apply)</label>
+        <div class="checkbox-grid" id="skillCheckGrid"></div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>Years of Experience</label>
+          <input type="number" id="wExperience" min="0" max="50" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label>Service Area / Locality</label>
+          <input type="text" id="wArea" placeholder="e.g. Haldwani">
+        </div>
+      </div>
+      <div class="field">
+        <label>ID / Certification Document</label>
+        <input type="file" id="wCert">
+        <p class="hint" style="margin-top:6px;">Uploaded for cooperative federation verification (demo — not stored).</p>
+      </div>
+      <button class="btn-main" onclick="submitWorkerOnboarding()">Submit for Verification</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WORKER DASHBOARD ================= -->
+<section class="page" id="page-worker-dashboard">
+  <header>
+    <div class="logo">KAARIGAR</div>
+    <div class="header-right">
+      <span class="nav-link" onclick="renderWorkerDashboard();showPage('page-worker-dashboard')">Dashboard</span>
+      <div class="profile"><div class="profile-icon" id="workerAvatar">W</div><span id="workerNameHeader">Worker</span></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="worker-grid">
+      <div class="wp-card">
+        <div class="wp-avatar" id="wpAvatarBig">W</div>
+        <h2 id="wpName" style="color:var(--navy);">Worker</h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:2px;" id="wpCoop">Cooperative Society</p>
+        <div class="profile-tags" id="wpSkillTags"></div>
+        <p style="font-size:13px;color:#555;margin-top:8px;" id="wpMeta">0 years experience · Haldwani</p>
+        <div id="wpVerifyArea"></div>
+        <div class="toggle-row">
+          <span>Available for bookings</span>
+          <div class="switch on" id="availSwitch" onclick="toggleAvailability()"></div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="num" id="statCustomers">0</div><div class="lbl">Total Customers</div></div>
+          <div class="stat-box"><div class="num" id="statTotal">0</div><div class="lbl">Total Requests</div></div>
+          <div class="stat-box"><div class="num" id="statCompleted">0</div><div class="lbl">Completed</div></div>
+          <div class="stat-box"><div class="num" id="statRating">New</div><div class="lbl">Rating</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-block">
+          <h2 class="h-title">📥 Incoming Booking Requests</h2>
+          <div id="workerRequestsList"></div>
+        </div>
+        <div class="section-block">
+          <h2 class="h-title">📋 Booking History</h2>
+          <div id="workerHistoryList"></div>
+        </div>
+        <div class="section-block">
+          <h2 class="h-title">💬 Customer Comments</h2>
+          <div id="workerReviewsList"></div>
+        </div>
+        <div class="section-block">
+          <h2 class="h-title">💰 Payments & Balance</h2>
+          <div class="balance-summary">
+            <div class="balance-box earned"><div class="amt" id="balEarned">₹0</div><div class="lbl">Total Received</div></div>
+            <div class="balance-box pending"><div class="amt" id="balPending">₹0</div><div class="lbl">Pending Balance</div></div>
+          </div>
+          <div id="workerPaymentsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROFILE MODAL ================= -->
+<div class="overlay" id="profileOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeOverlay('profileOverlay')">✕</button>
+    <div id="profileModalBody"></div>
+  </div>
+</div>
+
+<!-- ================= BOOKING MODAL ================= -->
+<div class="overlay" id="bookingOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeOverlay('bookingOverlay')">✕</button>
+    <h2>Book <span id="bookWorkerName"></span></h2>
+    <p class="sub" id="bookWorkerSkill"></p>
+    <div class="row-2">
+      <div class="field"><label>Date</label><input type="date" id="bookDate"></div>
+      <div class="field"><label>Time</label><input type="time" id="bookTime"></div>
+    </div>
+    <div class="field"><label>Service Address</label><textarea id="bookAddress" rows="2" placeholder="House no, street, locality"></textarea></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="bookNotes" rows="2" placeholder="Describe the issue briefly"></textarea></div>
+    <button class="btn-main" onclick="submitBooking()">Confirm Booking Request</button>
+  </div>
+</div>
+
+<script>
+/* ==================================================
+   DATA
+   ================================================== */
+const SERVICES = [
+  {key:'Electrician', icon:'⚡', desc:'Wiring & repairs'},
+  {key:'Plumber', icon:'🚰', desc:'Pipes & fittings'},
+  {key:'Carpenter', icon:'🪚', desc:'Furniture & repairs'},
+  {key:'Painter', icon:'🎨', desc:'Home painting'},
+  {key:'Cleaning', icon:'🧹', desc:'Home & office'},
+  {key:'Caregiver', icon:'❤️', desc:'Home assistance'},
+  {key:'Driver', icon:'🚗', desc:'Local transport'},
+  {key:'Gardener', icon:'🌱', desc:'Garden maintenance'}
+];
+
+const COOPS = ['Kumaon Shram Sahakari Federation','Haldwani Labour Cooperative Society','Uttarakhand Grameen Shram Sangh'];
+
+const SEED = {
+  Electrician:[['Rahul Kumar',6,4.8,1.5,true],['Amit Singh',4,4.6,3.2,true],['Vijay Sharma',8,4.7,5.4,false]],
+  Plumber:[['Rakesh Kumar',7,4.8,1.8,true],['Manoj Singh',5,4.6,3.5,true],['Deepak Joshi',9,4.7,4.7,false]],
+  Carpenter:[['Mohan Lal',8,4.8,2.1,true],['Rajesh Kumar',5,4.5,3.8,true],['Suresh Rawat',7,4.7,5.1,false]],
+  Painter:[['Sanjay Kumar',6,4.7,2.4,true],['Anil Sharma',4,4.6,4.1,false],['Mukul Singh',8,4.8,5.8,true]],
+  Cleaning:[['Sunita Devi',5,4.9,1.7,true],['Pooja Sharma',3,4.7,3.6,true],['Kavita Joshi',6,4.8,4.9,false]],
+  Caregiver:[['Neha Sharma',6,4.9,2.0,true],['Meena Devi',5,4.8,3.4,true],['Anita Joshi',8,4.7,5.0,false]],
+  Driver:[['Arjun Singh',8,4.8,1.9,true],['Vikas Kumar',6,4.6,3.7,true],['Rohit Rawat',10,4.9,5.3,false]],
+  Gardener:[['Hari Singh',7,4.8,2.2,true],['Mohan Singh',4,4.5,4.5,true],['Dev Kumar',6,4.7,5.8,false]]
+};
+
+let idCounter = 1;
+function makeWorker(name, skill, exp, rating, dist, available){
+  const icon = SERVICES.find(s=>s.key===skill).icon;
+  return {
+    id: idCounter++, name, skill, icon, experience: exp, rating, distance: dist,
+    available, verified: true,
+    coop: COOPS[idCounter % COOPS.length],
+    certifications: ['Cooperative Skill Certification','Police Verification'],
+    totalBookings: Math.floor(Math.random()*20)+3, completedBookings: 0
+  };
+}
+
+let workers = [];
+Object.keys(SEED).forEach(skill=>{
+  SEED[skill].forEach(w=> workers.push(makeWorker(w[0], skill, w[1], w[2], w[3], w[4])) );
+});
+
+let bookings = [];       // {id, workerId, workerName, service, customerName, customerPhone, date, time, address, notes, status, createdAt, rating, comment}
+let bookingIdCounter = 1;
+
+const FEEDBACK_POOL = [
+  {rating:5, comment:'Very punctual and finished the work neatly. Would book again.'},
+  {rating:5, comment:'Polite, skilled, and explained everything clearly. Great experience.'},
+  {rating:4, comment:'Good work overall, arrived a little late but did the job well.'},
+  {rating:5, comment:'Excellent service, fixed the issue quickly and charged fairly.'},
+  {rating:4, comment:'Reliable and honest. Minor delay but quality work.'},
+  {rating:5, comment:'Very professional, cleaned up after finishing the work.'}
+];
+
+let currentUser = null;  // {role:'customer'|'worker', name, phone}
+let myWorkerProfile = null;
+let selectedRole = 'customer';
+let activeBookingWorkerId = null;
+
+/* ==================================================
+   UTIL
+   ================================================== */
+function $(id){ return document.getElementById(id); }
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function closeOverlay(id){ $(id).classList.remove('active'); }
+function toast(msg, isError){
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = isError ? 'show error' : 'show';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=> t.classList.remove('show'), 2800);
+}
+function computeMatch(w){
+  const score = w.rating*15 + Math.max(0, 15 - w.distance*2) + (w.available?10:0);
+  return Math.min(99, Math.max(50, Math.round(score)));
+}
+function initials(name){ return name.trim().split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase(); }
+function myBookings(){
+  if(!currentUser) return [];
+  return bookings.filter(b=>b.customerPhone === currentUser.phone);
+}
+
+/* ==================================================
+   AUTH
+   ================================================== */
+function selectRole(role){
+  selectedRole = role;
+  $('tab-customer').classList.toggle('active', role==='customer');
+  $('tab-worker').classList.toggle('active', role==='worker');
+}
+
+function sendOTP(){
+  const name = $('loginName').value.trim();
+  const phone = $('loginPhone').value.trim();
+  const msg = $('authMsg');
+  if(name.length < 2){ msg.style.color='#c83c30'; msg.textContent='Please enter your name.'; return; }
+  if(phone.length !== 10 || isNaN(phone)){ msg.style.color='#c83c30'; msg.textContent='Enter a valid 10-digit mobile number.'; return; }
+  msg.style.color='#16834a';
+  msg.textContent='OTP sent successfully!';
+  $('loginFields').style.display='none';
+  $('otpSection').style.display='block';
+  $('stepDot1').classList.add('done');
+  $('stepDot2').classList.add('active');
+  $('stepLine').classList.add('filled');
+}
+
+let _verifying = false;
+function verifyOTP(){
+  if(_verifying) return;
+  const otp = $('otpInput').value.trim();
+  const msg = $('authMsg');
+  if(otp !== '123456'){ msg.style.color='#c83c30'; msg.textContent='Incorrect OTP. Try 123456.'; return; }
+  _verifying = true;
+  setTimeout(()=>{ _verifying = false; }, 800);
+
+  currentUser = { role: selectedRole, name: $('loginName').value.trim(), phone: $('loginPhone').value.trim() };
+
+  // reset login form for next time
+  $('loginFields').style.display='block';
+  $('otpSection').style.display='none';
+  $('loginName').value=''; $('loginPhone').value=''; $('otpInput').value=''; msg.textContent='';
+  $('stepDot1').classList.remove('done'); $('stepDot2').classList.remove('active'); $('stepLine').classList.remove('filled');
+
+  if(currentUser.role === 'customer'){
+    $('custNameHeader').textContent = currentUser.name;
+    $('custNameHeader2').textContent = currentUser.name;
+    $('custNameHeader3').textContent = currentUser.name;
+    $('custAvatar').textContent = initials(currentUser.name);
+    $('custAvatar2').textContent = initials(currentUser.name);
+    $('custAvatar3').textContent = initials(currentUser.name);
+    $('custGreeting').textContent = 'Good day, ' + currentUser.name.split(' ')[0] + ' 👋';
+    renderServiceGrid();
+    updateBookingBadge();
+    showPage('page-customer-dashboard');
+    toast('Welcome back, ' + currentUser.name + '!');
+  } else {
+    if(myWorkerProfile){
+      renderWorkerDashboard();
+      showPage('page-worker-dashboard');
+    } else {
+      $('wFullName').value = currentUser.name;
+      renderSkillCheckGrid();
+      showPage('page-worker-onboarding');
+    }
+  }
+}
+
+function logout(){
+  currentUser = null;
+  showPage('page-login');
+  toast('Logged out.');
+}
+
+/* ==================================================
+   CUSTOMER — SERVICE GRID / SEARCH
+   ================================================== */
+function renderServiceGrid(){
+  $('serviceGrid').innerHTML = SERVICES.map(s => `
+    <div class="service-card" onclick="openService('${s.key}')">
+      <div class="service-icon">${s.icon}</div>
+      <h3>${s.key}</h3>
+      <p>${s.desc}</p>
+    </div>`).join('');
+}
+
+function openService(service){ loadRecommendations(service); showPage('page-recommendations'); }
+
+function searchService(){
+  const q = $('searchInput').value.trim();
+  if(q === ''){ toast('Please enter a service to search.', true); return; }
+  const lower = q.toLowerCase();
+  let match = SERVICES.find(s => s.key.toLowerCase() === lower);
+  if(!match) match = SERVICES.find(s => s.key.toLowerCase().includes(lower) || lower.includes(s.key.toLowerCase()));
+  openService(match ? match.key : q);
+}
+
+function emergencyService(){ loadRecommendations('Emergency'); showPage('page-recommendations'); }
+
+/* ==================================================
+   RECOMMENDATIONS
+   ================================================== */
+function loadRecommendations(service){
+  let list;
+  let title, subtitle;
+
+  if(service === 'Emergency'){
+    list = workers.filter(w=>w.verified && w.available).sort((a,b)=>a.distance-b.distance).slice(0,6);
+    title = '🚨 Emergency — Nearest Available Workers';
+    subtitle = 'Verified workers who can respond right away';
+  } else {
+    list = workers.filter(w => w.verified && w.skill.toLowerCase() === service.toLowerCase());
+    if(list.length === 0){
+      list = workers.filter(w => w.verified && w.skill.toLowerCase().includes(service.toLowerCase()));
+    }
+    title = 'Recommended ' + service + 's';
+    subtitle = 'Verified ' + service.toLowerCase() + 's near your location';
+  }
+
+  list = [...list].sort((a,b)=> computeMatch(b) - computeMatch(a));
+
+  $('pageTitle').textContent = title;
+  $('pageSubtitle').textContent = subtitle;
+
+  const listEl = $('workersList');
+  if(list.length === 0){
+    listEl.innerHTML = `
+      <div class="no-workers">
+        <h3 style="color:#173b57;margin-bottom:6px;">No verified workers found for "${service}"</h3>
+        <p>Try one of our popular services instead:</p>
+        <div class="chips">${SERVICES.map(s=>`<span class="chip" onclick="openService('${s.key}')">${s.icon} ${s.key}</span>`).join('')}</div>
+      </div>`;
+  } else {
+    listEl.innerHTML = list.map(w => renderWorkerCard(w)).join('');
+  }
+
+  // update map labels
+  ['mapWorker1','mapWorker2','mapWorker3'].forEach((id,i)=>{
+    $(id).textContent = list[i] ? (list[i].name + ' • ' + list[i].distance + ' km') : '—';
+  });
+}
+
+function renderWorkerCard(w){
+  const match = computeMatch(w);
+  const ratingText = w.rating ? ('⭐ ' + w.rating) : '🆕 New';
+  return `
+    <div class="worker-card">
+      <div class="worker-avatar">${initials(w.name)}</div>
+      <div class="worker-details">
+        <div class="worker-name">
+          <h2>${w.name}</h2>
+          <span class="verified">✓ Verified</span>
+        </div>
+        <p class="skill">${w.icon} ${w.skill} · ${w.coop}</p>
+        <div class="info">
+          <span>${ratingText}</span>
+          <span>🛠️ ${w.experience} yrs</span>
+          <span>📍 ${w.distance} km</span>
+        </div>
+        <div class="availability ${w.available ? '' : 'off'}">${w.available ? '🟢 Available Today' : '⚪ Available Tomorrow'}</div>
+        <div class="match">🤖 AI Match: <strong>${match}%</strong><br><small>Skill + Distance + Availability + Rating</small></div>
+        <div class="buttons">
+          <button class="view-btn" onclick="viewProfile(${w.id})">View Profile</button>
+          <button class="book-btn" onclick="openBookingModal(${w.id})">Book Now</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function viewProfile(id){
+  const w = workers.find(x=>x.id===id);
+  if(!w) return;
+  $('profileModalBody').innerHTML = `
+    <div class="profile-row">
+      <div class="worker-avatar" style="width:56px;height:56px;">${initials(w.name)}</div>
+      <div>
+        <h2 style="margin-bottom:2px;">${w.name}</h2>
+        <p class="sub" style="margin:0;">${w.icon} ${w.skill} · ${w.coop}</p>
+      </div>
+    </div>
+    <div class="profile-tags">
+      <span class="tag">${w.experience} yrs experience</span>
+      <span class="tag">${w.rating ? w.rating + ' ★ rating' : 'New worker'}</span>
+      <span class="tag">${w.distance} km away</span>
+      <span class="tag">${w.available ? 'Available today' : 'Available tomorrow'}</span>
+    </div>
+    <p style="font-size:13px;color:#555;line-height:1.6;">${w.name.split(' ')[0]} is a verified ${w.skill.toLowerCase()} affiliated with ${w.coop}, matched to your location with an AI match score of ${computeMatch(w)}%.</p>
+    <h3 style="font-size:13px;color:#173b57;margin-top:16px;margin-bottom:4px;">Certifications</h3>
+    <ul class="cert-list">${w.certifications.map(c=>`<li>${c}</li>`).join('')}</ul>
+    <button class="btn-main" style="margin-top:18px;" onclick="closeOverlay('profileOverlay');openBookingModal(${w.id})">Book Now</button>
+  `;
+  $('profileOverlay').classList.add('active');
+}
+
+/* ==================================================
+   BOOKING
+   ================================================== */
+function openBookingModal(id){
+  if(!currentUser || currentUser.role !== 'customer'){ toast('Please login as a customer to book.', true); return; }
+  const w = workers.find(x=>x.id===id);
+  if(!w) return;
+  activeBookingWorkerId = id;
+  $('bookWorkerName').textContent = w.name;
+  $('bookWorkerSkill').textContent = w.icon + ' ' + w.skill + ' · ' + w.coop;
+  $('bookDate').value = new Date().toISOString().split('T')[0];
+  $('bookDate').min = new Date().toISOString().split('T')[0];
+  $('bookTime').value = '';
+  $('bookAddress').value = '';
+  $('bookNotes').value = '';
+  $('bookingOverlay').classList.add('active');
+}
+
+function submitBooking(){
+  const w = workers.find(x=>x.id===activeBookingWorkerId);
+  const date = $('bookDate').value, time = $('bookTime').value, address = $('bookAddress').value.trim();
+  if(!date || !time){ toast('Please choose a date and time.', true); return; }
+  if(address === ''){ toast('Please enter a service address.', true); return; }
+
+  bookings.push({
+    id: bookingIdCounter++,
+    workerId: w.id,
+    workerName: w.name,
+    service: w.skill,
+    customerName: currentUser.name,
+    customerPhone: currentUser.phone,
+    date, time, address,
+    notes: $('bookNotes').value.trim(),
+    status: 'Pending',
+    amount: Math.floor(Math.random()*800)+300,
+    paymentStatus: 'Unpaid',
+    createdAt: Date.now()
+  });
+  w.totalBookings++;
+
+  closeOverlay('bookingOverlay');
+  closeOverlay('profileOverlay');
+  toast('Booking request sent to ' + w.name + '!');
+  updateBookingBadge();
+}
+
+function updateBookingBadge(){
+  const n = myBookings().filter(b=>b.status==='Pending' || b.status==='Accepted').length;
+  ['bookingCountBadge','bookingCountBadge2'].forEach(id=>{ if($(id)) $(id).textContent = n; });
+}
+
+/* ==================================================
+   MY BOOKINGS (customer)
+   ================================================== */
+function renderMyBookings(){
+  const list = myBookings().sort((a,b)=>b.createdAt-a.createdAt);
+  const el = $('myBookingsList');
+  if(list.length === 0){
+    el.innerHTML = `<div class="empty-state"><h3 style="color:#173b57;margin-bottom:6px;">No bookings yet</h3><p>Book a verified worker from the dashboard to see it here.</p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(b => `
+    <div class="booking-card">
+      <div>
+        <h3 style="color:#173b57;">${b.workerName} · ${b.service}</h3>
+        <p style="color:#666;font-size:13px;margin-top:4px;">📅 ${b.date} at ${b.time}</p>
+        <p style="color:#666;font-size:13px;margin-top:2px;">📍 ${b.address}</p>
+        ${b.notes ? `<p style="color:#888;font-size:12px;margin-top:4px;">Note: ${b.notes}</p>` : ''}
+        <p style="color:#888;font-size:12px;margin-top:4px;">💰 ₹${b.amount}${b.status==='Completed' ? (b.paymentStatus==='Paid' ? ' · Paid' : ' · Balance due') : ' · Estimated'}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <span class="booking-status status-${b.status}">${b.status}</span>
+        ${b.status==='Pending' ? `<button class="view-btn" onclick="cancelBooking(${b.id})">Cancel</button>` : ''}
+      </div>
+    </div>`).join('');
+  updateBookingBadge();
+}
+
+function cancelBooking(id){
+  const b = bookings.find(x=>x.id===id);
+  if(b){ b.status = 'Cancelled'; renderMyBookings(); toast('Booking cancelled.'); }
+}
+
+/* ==================================================
+   WORKER — ONBOARDING
+   ================================================== */
+function renderSkillCheckGrid(){
+  $('skillCheckGrid').innerHTML = SERVICES.map(s => `
+    <label class="checkbox-item" id="chk-${s.key}">
+      <input type="checkbox" value="${s.key}" onchange="toggleSkillItem('${s.key}')">
+      ${s.icon} ${s.key}
+    </label>`).join('');
+}
+function toggleSkillItem(key){
+  $('chk-'+key).classList.toggle('checked');
+}
+
+function submitWorkerOnboarding(){
+  const name = $('wFullName').value.trim();
+  const coop = $('wCoop').value.trim();
+  const exp = parseInt($('wExperience').value) || 0;
+  const area = $('wArea').value.trim();
+  const skills = Array.from(document.querySelectorAll('#skillCheckGrid input:checked')).map(i=>i.value);
+
+  if(name.length < 2){ toast('Please enter your full name.', true); return; }
+  if(coop === ''){ toast('Please enter your cooperative society name.', true); return; }
+  if(skills.length === 0){ toast('Please select at least one skill.', true); return; }
+  if(area === ''){ toast('Please enter your service area.', true); return; }
+
+  const primarySkill = skills[0];
+  myWorkerProfile = {
+    id: idCounter++, name, skill: primarySkill, allSkills: skills,
+    icon: SERVICES.find(s=>s.key===primarySkill).icon,
+    experience: exp, rating: null, distance: (Math.random()*4+0.5).toFixed(1)*1,
+    available: true, verified: false, coop, area,
+    certifications: ['Submitted for review'],
+    totalBookings: 0, completedBookings: 0
+  };
+  // register under each selected skill so customers can find them once verified
+  skills.forEach(skill=>{
+    if(skill === primarySkill){ workers.push(myWorkerProfile); }
+    else { workers.push({...myWorkerProfile, id: idCounter++, skill, icon: SERVICES.find(s=>s.key===skill).icon}); }
+  });
+
+  renderWorkerDashboard();
+  showPage('page-worker-dashboard');
+  toast('Profile submitted! Awaiting cooperative federation verification.');
+}
+
+/* ==================================================
+   WORKER DASHBOARD
+   ================================================== */
+function renderWorkerDashboard(){
+  if(!myWorkerProfile) return;
+  const w = myWorkerProfile;
+  $('workerNameHeader').textContent = w.name;
+  $('workerAvatar').textContent = initials(w.name);
+  $('wpAvatarBig').textContent = initials(w.name);
+  $('wpName').textContent = w.name;
+  $('wpCoop').textContent = w.coop;
+  $('wpSkillTags').innerHTML = w.allSkills.map(s=>`<span class="tag">${s}</span>`).join('');
+  $('wpMeta').textContent = w.experience + ' years experience · ' + w.area;
+
+  if(w.verified){
+    $('wpVerifyArea').innerHTML = `<div style="margin-top:14px;"><span class="verified">✓ Verified by ${w.coop}</span></div>`;
+  } else {
+    $('wpVerifyArea').innerHTML = `
+      <div class="verify-banner">
+        Your profile is pending verification by your cooperative federation.
+        <br><button onclick="simulateVerification()">Simulate Federation Verification (Demo)</button>
+      </div>`;
+  }
+
+  $('availSwitch').classList.toggle('on', w.available);
+
+  const myBookingsAsWorker = () => bookings.filter(b=>b.workerId===w.id);
+  const pending = myBookingsAsWorker().filter(b=>b.status==='Pending');
+  const others = myBookingsAsWorker().filter(b=>b.status!=='Pending').sort((a,b)=>b.createdAt-a.createdAt);
+
+  const uniqueCustomers = new Set(myBookingsAsWorker().map(b=>b.customerPhone)).size;
+  $('statCustomers').textContent = uniqueCustomers;
+  $('statTotal').textContent = myBookingsAsWorker().length;
+  $('statCompleted').textContent = myBookingsAsWorker().filter(b=>b.status==='Completed').length;
+  $('statRating').textContent = w.rating ? w.rating : 'New';
+
+  $('workerRequestsList').innerHTML = pending.length === 0
+    ? `<div class="empty-state">No new booking requests right now.</div>`
+    : pending.map(b => `
+      <div class="booking-card">
+        <div>
+          <h3 style="color:#173b57;">${b.customerName}</h3>
+          <p style="color:#666;font-size:13px;margin-top:4px;">📅 ${b.date} at ${b.time}</p>
+          <p style="color:#666;font-size:13px;margin-top:2px;">📍 ${b.address}</p>
+          ${b.notes ? `<p style="color:#888;font-size:12px;margin-top:4px;">Note: ${b.notes}</p>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="book-btn" onclick="respondBooking(${b.id},'Accepted')">Accept</button>
+          <button class="view-btn" onclick="respondBooking(${b.id},'Declined')">Decline</button>
+        </div>
+      </div>`).join('');
+
+  $('workerHistoryList').innerHTML = others.length === 0
+    ? `<div class="empty-state">No booking history yet.</div>`
+    : others.map(b => `
+      <div class="booking-card">
+        <div>
+          <h3 style="color:#173b57;">${b.customerName}</h3>
+          <p style="color:#666;font-size:13px;margin-top:4px;">📅 ${b.date} at ${b.time}</p>
+          <p style="color:#666;font-size:13px;margin-top:2px;">📍 ${b.address}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <span class="booking-status status-${b.status}">${b.status}</span>
+          ${b.status==='Accepted' ? `<button class="view-btn" onclick="respondBooking(${b.id},'Completed')">Mark Completed</button>` : ''}
+        </div>
+      </div>`).join('');
+
+  const reviews = myBookingsAsWorker().filter(b=>b.status==='Completed' && b.comment).sort((a,b2)=>b2.createdAt-a.createdAt);
+  $('workerReviewsList').innerHTML = reviews.length === 0
+    ? `<div class="empty-state">No customer comments yet. Comments appear here once you complete a job.</div>`
+    : reviews.map(b => `
+      <div class="review-card">
+        <div class="review-top">
+          <h4>${b.customerName}</h4>
+          <span class="review-stars">${'★'.repeat(b.rating)}${'☆'.repeat(5-b.rating)} (${b.rating}.0)</span>
+        </div>
+        <p class="review-comment">"${b.comment}"</p>
+        <p class="review-date">${b.service} · ${b.date}</p>
+      </div>`).join('');
+
+  const paymentJobs = myBookingsAsWorker().filter(b=>b.status==='Completed').sort((a,b2)=>b2.createdAt-a.createdAt);
+  const totalEarned = paymentJobs.filter(b=>b.paymentStatus==='Paid').reduce((s,b)=>s+b.amount,0);
+  const totalPending = paymentJobs.filter(b=>b.paymentStatus==='Unpaid').reduce((s,b)=>s+b.amount,0);
+  $('balEarned').textContent = '₹' + totalEarned;
+  $('balPending').textContent = '₹' + totalPending;
+
+  $('workerPaymentsList').innerHTML = paymentJobs.length === 0
+    ? `<div class="empty-state">No completed jobs yet. Your earnings and pending balance will show here.</div>`
+    : paymentJobs.map(b => `
+      <div class="booking-card">
+        <div>
+          <h3 style="color:#173b57;">${b.customerName} · ${b.service}</h3>
+          <p style="color:#666;font-size:13px;margin-top:4px;">📅 ${b.date} · ₹${b.amount}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <span class="pay-status ${b.paymentStatus}">${b.paymentStatus === 'Paid' ? '✓ Paid' : '⏳ Balance Due'}</span>
+          ${b.paymentStatus === 'Unpaid' ? `<button class="mark-paid-btn" onclick="markPaid(${b.id})">Mark as Paid</button>` : ''}
+        </div>
+      </div>`).join('');
+}
+
+function toggleAvailability(){
+  if(!myWorkerProfile) return;
+  myWorkerProfile.available = !myWorkerProfile.available;
+  // keep any duplicate skill-entries for this worker in sync
+  workers.filter(w=>w.name===myWorkerProfile.name && w.coop===myWorkerProfile.coop).forEach(w=>w.available=myWorkerProfile.available);
+  renderWorkerDashboard();
+  toast(myWorkerProfile.available ? 'You are now available for bookings.' : 'You are now marked unavailable.');
+}
+
+function simulateVerification(){
+  if(!myWorkerProfile) return;
+  myWorkerProfile.verified = true;
+  myWorkerProfile.rating = 4.5;
+  myWorkerProfile.certifications = ['Cooperative Skill Certification','Police Verification'];
+  workers.filter(w=>w.name===myWorkerProfile.name && w.coop===myWorkerProfile.coop).forEach(w=>{
+    w.verified = true; w.rating = 4.5; w.certifications = myWorkerProfile.certifications;
+  });
+  renderWorkerDashboard();
+  toast('Congratulations! Your profile has been verified.');
+}
+
+function markPaid(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  b.paymentStatus = 'Paid';
+  renderWorkerDashboard();
+  toast('Payment marked as received.');
+}
+
+function respondBooking(id, status){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  b.status = status;
+  if(status === 'Completed'){
+    myWorkerProfile.completedBookings = (myWorkerProfile.completedBookings||0)+1;
+    // demo: simulate the customer leaving a rating & comment once the job is marked complete
+    const fb = FEEDBACK_POOL[Math.floor(Math.random()*FEEDBACK_POOL.length)];
+    b.rating = fb.rating;
+    b.comment = fb.comment;
+    const rated = bookings.filter(x=>x.workerId===myWorkerProfile.id && x.rating);
+    const avg = rated.reduce((s,x)=>s+x.rating,0) / rated.length;
+    myWorkerProfile.rating = Math.round(avg*10)/10;
+    workers.filter(w=>w.name===myWorkerProfile.name && w.coop===myWorkerProfile.coop).forEach(w=> w.rating = myWorkerProfile.rating);
+  }
+  renderWorkerDashboard();
+  toast('Booking marked as ' + status + '.');
+}
+
+/* ==================================================
+   INIT
+   ================================================== */
+renderServiceGrid();
+</script>
+</body>
+</html>
